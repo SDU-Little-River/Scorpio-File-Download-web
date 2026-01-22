@@ -6,7 +6,7 @@
     <title>Scorpio File Downloads</title>
     <style>
         :root {
-            /* Light Theme Variables */
+            /* Light Theme */
             --primary-color: #42b983;
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
@@ -15,14 +15,14 @@
             --border-color: #eaecef;
             --hover-bg: #f0fcf6;
             --input-bg: #ffffff;
-            --modal-bg: rgba(255, 255, 255, 0.95);
+            --modal-bg: rgba(255, 255, 255, 0.98);
             --modal-overlay: rgba(0, 0, 0, 0.6);
             --shadow-color: rgba(0, 0, 0, 0.05);
             --btn-bg: #ffffff;
             --btn-text: #2c3e50;
         }
 
-        /* Dark Theme Variables */
+        /* Dark Theme */
         [data-theme="dark"] {
             --primary-color: #42b983;
             --bg-color: #121212;
@@ -32,7 +32,7 @@
             --border-color: #333333;
             --hover-bg: #2c3e50;
             --input-bg: #2d2d2d;
-            --modal-bg: rgba(30, 30, 30, 0.95);
+            --modal-bg: rgba(30, 30, 30, 0.98);
             --modal-overlay: rgba(0, 0, 0, 0.8);
             --shadow-color: rgba(0, 0, 0, 0.5);
             --btn-bg: #2d2d2d;
@@ -60,25 +60,27 @@
             transition: background-color 0.3s, box-shadow 0.3s;
         }
 
-        /* Header Layout */
+        /* Header */
         .header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            position: relative;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .header h2 {
             margin: 0;
+            font-size: 24px;
         }
 
-        /* Theme Toggle Button */
-        .theme-toggle {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -90,22 +92,15 @@
             justify-content: center;
             transition: background-color 0.3s;
         }
-        
-        .theme-toggle:hover {
+
+        .icon-btn:hover {
             background-color: var(--border-color);
         }
 
-        .theme-icon {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
+        .svg-icon { width: 24px; height: 24px; fill: currentColor; }
 
-        /* Search Box Styles */
-        .search-box {
-            margin-bottom: 20px;
-            position: relative;
-        }
+        /* Search */
+        .search-box { margin-bottom: 20px; position: relative; }
         .search-input {
             width: 100%;
             padding: 12px 15px;
@@ -117,10 +112,7 @@
             box-sizing: border-box;
             transition: all 0.3s;
         }
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
+        .search-input:focus { outline: none; border-color: var(--primary-color); }
 
         /* Breadcrumbs */
         .breadcrumbs {
@@ -129,32 +121,17 @@
             color: var(--sub-text-color);
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow-x: auto;
         }
-        .crumb {
-            cursor: pointer;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        .crumb:hover {
-            text-decoration: underline;
-        }
-        .crumb-separator {
-            margin: 0 5px;
-            color: var(--sub-text-color);
-        }
-        .crumb-current {
-            color: var(--sub-text-color);
-            cursor: default;
-            text-decoration: none !important;
-        }
+        .crumb { cursor: pointer; color: var(--primary-color); font-weight: 500; }
+        .crumb:hover { text-decoration: underline; }
+        .crumb-separator { margin: 0 5px; color: var(--sub-text-color); }
+        .crumb-current { color: var(--sub-text-color); cursor: default; text-decoration: none !important; }
 
-        /* File List Styles */
-        .file-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
+        /* File List */
+        .file-list { list-style: none; padding: 0; margin: 0; }
+
         .file-item {
             display: flex;
             align-items: center;
@@ -165,55 +142,37 @@
             border-radius: 4px;
             color: var(--text-color);
         }
-        .file-item:hover {
-            background-color: var(--hover-bg);
-        }
+        .file-item:hover { background-color: var(--hover-bg); }
 
-        .item-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        
-        .item-name {
-            flex-grow: 1;
-            font-size: 15px;
-            word-break: break-all;
-        }
-        .item-name div div {
-            color: var(--sub-text-color) !important; 
-        }
+        .item-icon { width: 24px; height: 24px; margin-right: 12px; flex-shrink: 0; }
+        .item-name { flex-grow: 1; font-size: 15px; word-break: break-all; }
 
-        .loading, .error {
-            text-align: center;
-            padding: 40px;
-            color: var(--sub-text-color);
-        }
+        .loading, .error { text-align: center; padding: 40px; color: var(--sub-text-color); line-height: 1.6; }
         .error { color: #e74c3c; }
 
-        /* Modal Styles */
-        .download-modal {
+        /* Modals */
+        .modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: var(--modal-bg);
             backdrop-filter: blur(8px);
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             z-index: 1001;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
             width: 500px;
             max-width: 90%;
             color: var(--text-color);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .download-modal-overlay {
+        .modal.active { display: flex; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -222,94 +181,107 @@
             background-color: var(--modal-overlay);
             backdrop-filter: blur(2px);
             z-index: 1000;
+            display: none;
             animation: fadeIn 0.2s ease;
         }
+        .modal-overlay.active { display: block; }
 
-        .download-button {
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+
+        .download-button, .action-button {
             display: inline-flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 12px 15px;
             font-size: 15px;
             color: var(--btn-text) !important;
             background-color: var(--btn-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             transition: all 0.2s;
-            margin: 2px 0;
             cursor: pointer;
             text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .download-button:hover {
+        .download-button:hover, .action-button:hover {
             border-color: var(--primary-color);
             color: var(--primary-color) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(66, 185, 131, 0.2);
+            box-shadow: 0 4px 10px rgba(66, 185, 131, 0.15);
         }
 
-        .download-icon {
-            width: 20px;
-            height: 20px;
-            color: var(--primary-color);
+        .action-button.active {
+            background-color: var(--primary-color);
+            color: white !important;
+            border-color: var(--primary-color);
         }
+        .action-button.active:hover { opacity: 0.9; box-shadow: none; color: white !important; }
+        .download-icon { width: 20px; height: 20px; color: var(--primary-color); }
 
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
+        /* Settings */
+        .settings-group { display: flex; flex-direction: column; gap: 10px; }
+        .settings-label { font-size: 14px; color: var(--sub-text-color); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { transform: translate(-50%, -45%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
 
-        @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-            .theme-toggle {
-                position: absolute;
-                top: 0;
-                right: 0;
-            }
-        }
+        @media (max-width: 600px) { .header h2 { font-size: 20px; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Header with Title and Theme Toggle -->
     <div class="header">
-        <h2>Scorpio File Downloads</h2>
-        <button class="theme-toggle" id="themeBtn" aria-label="Toggle Dark Mode" onclick="toggleTheme()">
-            <!-- Sun Icon (Default) -->
-            <svg class="theme-icon" id="sunIcon" viewBox="0 0 24 24" style="display:block">
-                <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000 1.41.996.996 0 001.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06z"/>
-            </svg>
-            <!-- Moon Icon (Hidden by default) -->
-            <svg class="theme-icon" id="moonIcon" viewBox="0 0 24 24" style="display:none">
-                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
-            </svg>
-        </button>
+        <h2>Scorpio Downloads</h2>
+        <div class="header-actions">
+            <!-- Theme Toggle -->
+            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Theme">
+                <svg class="svg-icon" id="sunIcon" viewBox="0 0 24 24" style="display:block"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000 1.41.996.996 0 001.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06z"/></svg>
+                <svg class="svg-icon" id="moonIcon" viewBox="0 0 24 24" style="display:none"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+            </button>
+            <!-- Settings Button -->
+            <button class="icon-btn" onclick="openSettings()" title="Settings">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+        </div>
     </div>
 
-    <!-- Search Box -->
     <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="Search files...">
     </div>
 
-    <!-- Breadcrumbs -->
     <div class="breadcrumbs" id="breadcrumbs"></div>
 
-    <!-- File List Container -->
     <div id="fileListContainer" class="file-list">
-        <div class="loading">Loading file list...</div>
+        <div class="loading">Loading...</div>
+    </div>
+</div>
+
+<!-- Download Modal -->
+<div class="modal-overlay" id="downloadOverlay" onclick="closeAllModals()"></div>
+<div class="modal" id="downloadModal">
+    <div class="modal-title">Select Mirror</div>
+    <div id="downloadFileName" style="font-size:12px;color:var(--sub-text-color);margin-bottom:10px;word-break:break-all"></div>
+    <div id="downloadLinks" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal">
+    <div class="modal-title">Settings / 设置</div>
+
+    <div class="settings-group">
+        <div class="settings-label">List API Source / 列表获取源</div>
+
+        <button class="action-button" id="btnSourceVercel" onclick="changeSource('vercel')">
+            Vercel API (Proxy)
+            <div style="font-size:10px;opacity:0.7">Recommended for China (Requires api/files.js)</div>
+        </button>
+
+        <button class="action-button" id="btnSourceGithub" onclick="changeSource('github')">
+            GitHub API (Direct)
+            <div style="font-size:10px;opacity:0.7">Default / Only works outside China</div>
+        </button>
     </div>
 </div>
 
@@ -318,108 +290,136 @@
     const REPO_OWNER = 'DuskScorpio';
     const REPO_NAME = 'Scorpio-File-Downloads';
     const BRANCH = 'main';
-    const BASE_DIR = 'Files'; 
+    const BASE_DIR = 'Files';
 
     // State Management
-    let allFiles = []; 
-    let currentPath = ''; 
+    let allFiles = [];
+    let currentPath = '';
+    // Default to 'vercel' because 'github' is blocked in China and 'jsdelivr' blocks your repo
+    let currentSource = localStorage.getItem('dataSource') || 'vercel';
 
-    // Icons SVG
     const ICONS = {
         folder: `<svg class="item-icon" viewBox="0 0 24 24" fill="#F7D774"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
         file: `<svg class="item-icon" viewBox="0 0 24 24" fill="#a0a0a0"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
     };
 
-    // --- Theme Logic ---
     function initTheme() {
         const savedTheme = localStorage.getItem('theme');
+        const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        applyTheme(isDark);
+    }
+
+    function applyTheme(isDark) {
+        const html = document.documentElement;
         const sunIcon = document.getElementById('sunIcon');
         const moonIcon = document.getElementById('moonIcon');
-        
-        // If user explicitly saved dark, or hasn't saved but system prefers dark
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.setAttribute('data-theme', 'dark');
+        if (isDark) {
+            html.setAttribute('data-theme', 'dark');
             sunIcon.style.display = 'none';
             moonIcon.style.display = 'block';
         } else {
-            document.documentElement.removeAttribute('data-theme');
+            html.removeAttribute('data-theme');
             sunIcon.style.display = 'block';
             moonIcon.style.display = 'none';
         }
     }
 
     window.toggleTheme = function() {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const sunIcon = document.getElementById('sunIcon');
-        const moonIcon = document.getElementById('moonIcon');
-
-        if (current === 'dark') {
-            html.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
-        } else {
-            html.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
-        }
+        const current = document.documentElement.getAttribute('data-theme') === 'dark';
+        localStorage.setItem('theme', !current ? 'dark' : 'light');
+        applyTheme(!current);
     }
 
-    // Initialize: Fetch GitHub Tree
-    async function init() {
-        initTheme(); // Set theme immediately
+    // --- Data Source Logic ---
+    async function loadFiles() {
+        const container = id('fileListContainer');
+        container.innerHTML = `<div class="loading">Loading files via <b>${currentSource === 'vercel' ? 'Vercel API' : 'GitHub'}</b>...</div>`;
+
         try {
-            const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`);
-            if (!response.ok) throw new Error('GitHub API rate limit or network error');
-            const data = await response.json();
-            
-            allFiles = data.tree.filter(item => item.path.startsWith(BASE_DIR));
-            
-            renderBreadcrumbs();
-            renderList();
+            let data = [];
+            if (currentSource === 'vercel') {
+                // Calls the local Vercel Function we created in api/files.js
+                const res = await fetch('/api/files');
+                if (!res.ok) {
+                    if(res.status === 404) throw new Error("API file not found. Did you create 'api/files.js'?");
+                    throw new Error(`API Error: ${res.status}`);
+                }
+                const json = await res.json();
+                data = json.tree;
+            } else {
+                // Direct GitHub (Blocked in China)
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`GitHub API Error: ${res.status}`);
+                const json = await res.json();
+                data = json.tree;
+            }
+
+            if (!data) throw new Error("No data received from API");
+
+            allFiles = data.filter(item => item.path.startsWith(BASE_DIR));
+
+            if (allFiles.length === 0) {
+                container.innerHTML = `<div class="error">No files found in directory '${BASE_DIR}'<br>Please check configuration.</div>`;
+            } else {
+                renderBreadcrumbs();
+                renderList();
+            }
         } catch (e) {
-            document.getElementById('fileListContainer').innerHTML = `<div class="error">Load Failed: ${e.message}<br>Try again later.</div>`;
+            console.error(e);
+            let errorMsg = `Failed to load files: ${e.message}`;
+            if (currentSource === 'vercel') {
+                errorMsg += `<br><br>Make sure you created <b>api/files.js</b> in your repo.`;
+            } else {
+                errorMsg += `<br><br><button class="action-button" onclick="changeSource('vercel')" style="width:auto;display:inline-flex;">Switch to Vercel API (Proxy)</button>`;
+            }
+            container.innerHTML = `<div class="error">${errorMsg}</div>`;
         }
     }
 
-    // Render Breadcrumbs
+    window.changeSource = function(source) {
+        currentSource = source;
+        localStorage.setItem('dataSource', source);
+        updateSettingsUI();
+        closeAllModals();
+        loadFiles();
+    }
+
+    function updateSettingsUI() {
+        id('btnSourceVercel').classList.remove('active');
+        id('btnSourceGithub').classList.remove('active');
+
+        if (currentSource === 'vercel') id('btnSourceVercel').classList.add('active');
+        else id('btnSourceGithub').classList.add('active');
+    }
+
+    // --- Rendering ---
     function renderBreadcrumbs() {
         const breadContainer = id('breadcrumbs');
         let html = `<span class="crumb" onclick="navigateTo('')">Home</span>`;
-        
         if (currentPath) {
             const parts = currentPath.split('/').filter(Boolean);
             let cumulativePath = '';
-            
             parts.forEach((part, index) => {
                 cumulativePath += part + '/';
                 html += `<span class="crumb-separator">/</span>`;
-                const cleanPath = cumulativePath.slice(0, -1); 
-                
-                if (index === parts.length - 1) {
-                    html += `<span class="crumb-current">${part}</span>`;
-                } else {
-                    html += `<span class="crumb" onclick="navigateTo('${cleanPath}')">${part}</span>`;
-                }
+                const cleanPath = cumulativePath.slice(0, -1);
+                html += (index === parts.length - 1)
+                    ? `<span class="crumb-current">${part}</span>`
+                    : `<span class="crumb" onclick="navigateTo('${cleanPath}')">${part}</span>`;
             });
         }
         breadContainer.innerHTML = html;
     }
 
-    // Render File List
     function renderList(searchQuery = '') {
         const container = id('fileListContainer');
         container.innerHTML = '';
-        
         let itemsToShow = [];
 
         if (searchQuery) {
-            // Search Mode
-            itemsToShow = allFiles.filter(item => 
-                item.type === 'blob' && 
-                item.path.toLowerCase().includes(searchQuery.toLowerCase())
+            itemsToShow = allFiles.filter(item =>
+                item.type === 'blob' && item.path.toLowerCase().includes(searchQuery.toLowerCase())
             ).map(item => ({
                 name: item.path.split('/').pop(),
                 path: item.path,
@@ -427,41 +427,23 @@
                 displayPath: item.path.replace(BASE_DIR + '/', '')
             }));
         } else {
-            // Browse Mode
             const prefix = currentPath ? `${BASE_DIR}/${currentPath}/` : `${BASE_DIR}/`;
             const processedFolders = new Set();
-            
             allFiles.forEach(item => {
                 if (!item.path.startsWith(prefix)) return;
-                
                 const relativePart = item.path.slice(prefix.length);
                 const segments = relativePart.split('/');
-                
-                if (segments.length === 1) {
-                    if (item.type === 'blob') {
-                        itemsToShow.push({
-                            name: segments[0],
-                            path: item.path,
-                            type: 'file'
-                        });
-                    }
-                } else {
+                if (segments.length === 1 && item.type === 'blob') {
+                    itemsToShow.push({ name: segments[0], path: item.path, type: 'file' });
+                } else if (segments.length > 1) {
                     const folderName = segments[0];
                     if (!processedFolders.has(folderName)) {
                         processedFolders.add(folderName);
-                        itemsToShow.push({
-                            name: folderName,
-                            path: currentPath ? `${currentPath}/${folderName}` : folderName,
-                            type: 'folder'
-                        });
+                        itemsToShow.push({ name: folderName, path: currentPath ? `${currentPath}/${folderName}` : folderName, type: 'folder' });
                     }
                 }
             });
-
-            itemsToShow.sort((a, b) => {
-                if (a.type === b.type) return a.name.localeCompare(b.name);
-                return a.type === 'folder' ? -1 : 1;
-            });
+            itemsToShow.sort((a, b) => (a.type === b.type) ? a.name.localeCompare(b.name) : (a.type === 'folder' ? -1 : 1));
         }
 
         if (itemsToShow.length === 0) {
@@ -469,55 +451,30 @@
             return;
         }
 
-        // Generate HTML
         itemsToShow.forEach(item => {
             const div = document.createElement('div');
             div.className = 'file-item';
-            
-            let displayName = item.name;
-            if (searchQuery) {
-                displayName = `<div>${item.name}<div style="font-size:12px">${item.displayPath}</div></div>`;
-            }
-
-            div.innerHTML = `
-                ${item.type === 'folder' ? ICONS.folder : ICONS.file}
-                <div class="item-name">${displayName}</div>
-            `;
-
-            if (item.type === 'folder') {
-                div.onclick = () => navigateTo(item.path);
-            } else {
-                div.onclick = () => showDownloadModal(item.path);
-            }
-            
+            let displayName = searchQuery ? `<div>${item.name}<div style="font-size:12px;color:var(--sub-text-color)">${item.displayPath}</div></div>` : item.name;
+            div.innerHTML = `${item.type === 'folder' ? ICONS.folder : ICONS.file}<div class="item-name">${displayName}</div>`;
+            div.onclick = item.type === 'folder' ? () => navigateTo(item.path) : () => showDownloadModal(item.path);
             container.appendChild(div);
         });
     }
 
     window.navigateTo = function(path) {
         currentPath = path;
-        id('searchInput').value = ''; 
+        id('searchInput').value = '';
         renderBreadcrumbs();
         renderList();
     }
 
-    id('searchInput').addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        renderList(query);
-    });
+    id('searchInput').addEventListener('input', (e) => renderList(e.target.value.trim()));
 
-    function id(name) { return document.getElementById(name); }
-
-    // --- Download Modal Logic ---
+    // --- Modals ---
     function showDownloadModal(fullRepoPath) {
-        const encodedPath = fullRepoPath
-            .trim()
-            .split('/')
-            .map(segment => encodeURIComponent(segment))
-            .join('/');
-
+        const encodedPath = fullRepoPath.trim().split('/').map(encodeURIComponent).join('/');
         const repoBase = `https://github.com/${REPO_OWNER}/${REPO_NAME}/raw/${BRANCH}/`;
-        
+
         const mirrors = [
             { name: 'GitHub Raw (Official)', baseUrl: repoBase },
             { name: 'Mirror 1 (github.tbedu.top)', baseUrl: 'https://github.tbedu.top/' + repoBase },
@@ -527,39 +484,36 @@
             { name: 'Mirror 5 (fastgit.cc)', baseUrl: 'https://fastgit.cc/' + repoBase }
         ];
 
-        const modalContent = mirrors.map(mirror => {
-            const downloadUrl = mirror.baseUrl + encodedPath;
-            return `
-                <a href="${downloadUrl}" class="download-button" target="_blank">
-                    ${mirror.name}
-                    <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                    </svg>
-                </a>
-            `;
-        }).join('');
+        const linksHtml = mirrors.map(mirror => `
+            <a href="${mirror.baseUrl + encodedPath}" class="download-button" target="_blank">
+                ${mirror.name}
+                <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            </a>
+        `).join('');
 
-        const modalHtml = `
-            <div class="download-modal-overlay" onclick="closeDownloadModal()"></div>
-            <div class="download-modal">
-                <div class="modal-title">Select Download Mirror</div>
-                <div style="font-size:12px;color:var(--sub-text-color);margin-bottom:10px;word-break:break-all">${fullRepoPath.split('/').pop()}</div>
-                ${modalContent}
-            </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        id('downloadFileName').innerText = fullRepoPath.split('/').pop();
+        id('downloadLinks').innerHTML = linksHtml;
+        id('downloadOverlay').classList.add('active');
+        id('downloadModal').classList.add('active');
     }
 
-    window.closeDownloadModal = function() {
-        const modalOverlay = document.querySelector('.download-modal-overlay');
-        const modal = document.querySelector('.download-modal');
-        if (modalOverlay) modalOverlay.remove();
-        if (modal) modal.remove();
+    window.openSettings = function() {
+        updateSettingsUI();
+        id('downloadOverlay').classList.add('active');
+        id('settingsModal').classList.add('active');
     }
 
-    init();
+    window.closeAllModals = function() {
+        id('downloadOverlay').classList.remove('active');
+        id('downloadModal').classList.remove('active');
+        id('settingsModal').classList.remove('active');
+    }
 
+    function id(name) { return document.getElementById(name); }
+
+    // Start
+    initTheme();
+    loadFiles();
 </script>
 </body>
 </html>
