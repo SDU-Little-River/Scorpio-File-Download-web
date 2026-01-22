@@ -11,7 +11,7 @@
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
             --text-color: #34495e;
-            --sub-text-color: #666666; /* Fixed syntax error here */
+            --sub-text-color: #666666;
             --border-color: #eaecef;
             --hover-bg: #f0fcf6;
             --input-bg: #ffffff;
@@ -27,7 +27,7 @@
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #e0e0e0;
-            --sub-text-color: #a0a0a0; /* Fixed syntax error here */
+            --sub-text-color: #a0a0a0;
             --border-color: #333333;
             --hover-bg: #2c3e50;
             --input-bg: #2d2d2d;
@@ -124,16 +124,19 @@
         .item-icon { width: 24px; height: 24px; margin-right: 12px; flex-shrink: 0; }
         .item-name { flex-grow: 1; font-size: 15px; word-break: break-all; padding-right: 40px; }
 
-        /* Copy Button in List */
+        /* Copy Button in List (FIXED: No jumping) */
         .list-copy-btn {
             padding: 6px;
             border-radius: 4px;
             color: var(--sub-text-color);
-            display: none; /* Hidden by default, shown on hover */
+            /* Fixed: Always display, just toggle opacity */
+            display: flex;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
             align-items: center;
             justify-content: center;
         }
-        .file-item:hover .list-copy-btn { display: flex; }
+        .file-item:hover .list-copy-btn { opacity: 1; }
         .list-copy-btn:hover { background-color: rgba(0,0,0,0.1); color: var(--primary-color); }
 
         .loading, .error { text-align: center; padding: 40px; color: var(--sub-text-color); }
