@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorpio File Downloads</title>
+    <style>
+        :root {
+            /* Light Theme Variables */
+            --primary-color: #42b983;
+            --bg-color: #f7f9fa;
+            --card-bg: #ffffff;
+            --text-color: #34495e;
+            --sub-text-color: #666666;
+            --border-color: #eaecef;
+            --hover-bg: #f0fcf6;
+            --input-bg: #ffffff;
+            --modal-bg: rgba(255, 255, 255, 0.95);
+            --modal-overlay: rgba(0, 0, 0, 0.6);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --btn-bg: #ffffff;
+            --btn-text: #2c3e50;
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --primary-color: #42b983;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --sub-text-color: #a0a0a0;
+            --border-color: #333333;
+            --hover-bg: #2c3e50;
+            --input-bg: #2d2d2d;
+            --modal-bg: rgba(30, 30, 30, 0.95);
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --btn-bg: #2d2d2d;
+            --btn-text: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            padding: 20px;
+            min-height: 80vh;
+            position: relative;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Header Layout */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--border-color);
+        }
+
+        .theme-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Search Box Styles */
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Breadcrumbs */
+        .breadcrumbs {
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: var(--sub-text-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .crumb {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        .crumb:hover {
+            text-decoration: underline;
+        }
+        .crumb-separator {
+            margin: 0 5px;
+            color: var(--sub-text-color);
+        }
+        .crumb-current {
+            color: var(--sub-text-color);
+            cursor: default;
+            text-decoration: none !important;
+        }
+
+        /* File List Styles */
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+        .file-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .item-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .item-name {
+            flex-grow: 1;
+            font-size: 15px;
+            word-break: break-all;
+        }
+        .item-name div div {
+            color: var(--sub-text-color) !important; 
+        }
+
+        .loading, .error {
+            text-align: center;
+            padding: 40px;
+            color: var(--sub-text-color);
+        }
+        .error { color: #e74c3c; }
+
+        /* Modal Styles */
+        .download-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--modal-bg);
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 500px;
+            max-width: 90%;
+            color: var(--text-color);
+        }
+
+        .download-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-overlay);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .download-button {
+            display: inline-flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            font-size: 15px;
+            color: var(--btn-text) !important;
+            background-color: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin: 2px 0;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .download-button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(66, 185, 131, 0.2);
+        }
+
+        .download-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--primary-color);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .theme-toggle {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header with Title and Theme Toggle -->
+    <div class="header">
+        <h2>Scorpio File Downloads</h2>
+        <button class="theme-toggle" id="themeBtn" aria-label="Toggle Dark Mode" onclick="toggleTheme()">
+            <!-- Sun Icon (Default) -->
+            <svg class="theme-icon" id="sunIcon" viewBox="0 0 24 24" style="display:block">
+                <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000 1.41.996.996 0 001.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06z"/>
+            </svg>
+            <!-- Moon Icon (Hidden by default) -->
+            <svg class="theme-icon" id="moonIcon" viewBox="0 0 24 24" style="display:none">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search files...">
+    </div>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs" id="breadcrumbs"></div>
+
+    <!-- File List Container -->
+    <div id="fileListContainer" class="file-list">
+        <div class="loading">Loading file list...</div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const REPO_OWNER = 'DuskScorpio';
+    const REPO_NAME = 'Scorpio-File-Downloads';
+    const BRANCH = 'main';
+    const BASE_DIR = 'Files'; 
+
+    // State Management
+    let allFiles = []; 
+    let currentPath = ''; 
+
+    // Icons SVG
+    const ICONS = {
+        folder: `<svg class="item-icon" viewBox="0 0 24 24" fill="#F7D774"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
+        file: `<svg class="item-icon" viewBox="0 0 24 24" fill="#a0a0a0"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
+    };
+
+    // --- Theme Logic ---
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        
+        // If user explicitly saved dark, or hasn't saved but system prefers dark
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+
+    window.toggleTheme = function() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        if (current === 'dark') {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        }
+    }
+
+    // Initialize: Fetch GitHub Tree
+    async function init() {
+        initTheme(); // Set theme immediately
+        try {
+            const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`);
+            if (!response.ok) throw new Error('GitHub API rate limit or network error');
+            const data = await response.json();
+            
+            allFiles = data.tree.filter(item => item.path.startsWith(BASE_DIR));
+            
+            renderBreadcrumbs();
+            renderList();
+        } catch (e) {
+            document.getElementById('fileListContainer').innerHTML = `<div class="error">Load Failed: ${e.message}<br>Try again later.</div>`;
+        }
+    }
+
+    // Render Breadcrumbs
+    function renderBreadcrumbs() {
+        const breadContainer = id('breadcrumbs');
+        let html = `<span class="crumb" onclick="navigateTo('')">Home</span>`;
+        
+        if (currentPath) {
+            const parts = currentPath.split('/').filter(Boolean);
+            let cumulativePath = '';
+            
+            parts.forEach((part, index) => {
+                cumulativePath += part + '/';
+                html += `<span class="crumb-separator">/</span>`;
+                const cleanPath = cumulativePath.slice(0, -1); 
+                
+                if (index === parts.length - 1) {
+                    html += `<span class="crumb-current">${part}</span>`;
+                } else {
+                    html += `<span class="crumb" onclick="navigateTo('${cleanPath}')">${part}</span>`;
+                }
+            });
+        }
+        breadContainer.innerHTML = html;
+    }
+
+    // Render File List
+    function renderList(searchQuery = '') {
+        const container = id('fileListContainer');
+        container.innerHTML = '';
+        
+        let itemsToShow = [];
+
+        if (searchQuery) {
+            // Search Mode
+            itemsToShow = allFiles.filter(item => 
+                item.type === 'blob' && 
+                item.path.toLowerCase().includes(searchQuery.toLowerCase())
+            ).map(item => ({
+                name: item.path.split('/').pop(),
+                path: item.path,
+                type: 'file',
+                displayPath: item.path.replace(BASE_DIR + '/', '')
+            }));
+        } else {
+            // Browse Mode
+            const prefix = currentPath ? `${BASE_DIR}/${currentPath}/` : `${BASE_DIR}/`;
+            const processedFolders = new Set();
+            
+            allFiles.forEach(item => {
+                if (!item.path.startsWith(prefix)) return;
+                
+                const relativePart = item.path.slice(prefix.length);
+                const segments = relativePart.split('/');
+                
+                if (segments.length === 1) {
+                    if (item.type === 'blob') {
+                        itemsToShow.push({
+                            name: segments[0],
+                            path: item.path,
+                            type: 'file'
+                        });
+                    }
+                } else {
+                    const folderName = segments[0];
+                    if (!processedFolders.has(folderName)) {
+                        processedFolders.add(folderName);
+                        itemsToShow.push({
+                            name: folderName,
+                            path: currentPath ? `${currentPath}/${folderName}` : folderName,
+                            type: 'folder'
+                        });
+                    }
+                }
+            });
+
+            itemsToShow.sort((a, b) => {
+                if (a.type === b.type) return a.name.localeCompare(b.name);
+                return a.type === 'folder' ? -1 : 1;
+            });
+        }
+
+        if (itemsToShow.length === 0) {
+            container.innerHTML = '<div class="loading">No files found.</div>';
+            return;
+        }
+
+        // Generate HTML
+        itemsToShow.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            
+            let displayName = item.name;
+            if (searchQuery) {
+                displayName = `<div>${item.name}<div style="font-size:12px">${item.displayPath}</div></div>`;
+            }
+
+            div.innerHTML = `
+                ${item.type === 'folder' ? ICONS.folder : ICONS.file}
+                <div class="item-name">${displayName}</div>
+            `;
+
+            if (item.type === 'folder') {
+                div.onclick = () => navigateTo(item.path);
+            } else {
+                div.onclick = () => showDownloadModal(item.path);
+            }
+            
+            container.appendChild(div);
+        });
+    }
+
+    window.navigateTo = function(path) {
+        currentPath = path;
+        id('searchInput').value = ''; 
+        renderBreadcrumbs();
+        renderList();
+    }
+
+    id('searchInput').addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        renderList(query);
+    });
+
+    function id(name) { return document.getElementById(name); }
+
+    // --- Download Modal Logic ---
+    function showDownloadModal(fullRepoPath) {
+        const encodedPath = fullRepoPath
+            .trim()
+            .split('/')
+            .map(segment => encodeURIComponent(segment))
+            .join('/');
+
+        const repoBase = `https://github.com/${REPO_OWNER}/${REPO_NAME}/raw/${BRANCH}/`;
+        
+        const mirrors = [
+            { name: 'GitHub Raw (Official)', baseUrl: repoBase },
+            { name: 'Mirror 1 (github.tbedu.top)', baseUrl: 'https://github.tbedu.top/' + repoBase },
+            { name: 'Mirror 2 (gh.llkk.cc)', baseUrl: 'https://gh.llkk.cc/' + repoBase },
+            { name: 'Mirror 3 (gh-proxy.com)', baseUrl: 'https://gh-proxy.com/' + repoBase },
+            { name: 'Mirror 4 (github.7boe.top)', baseUrl: 'https://github.7boe.top/' + repoBase },
+            { name: 'Mirror 5 (fastgit.cc)', baseUrl: 'https://fastgit.cc/' + repoBase }
+        ];
+
+        const modalContent = mirrors.map(mirror => {
+            const downloadUrl = mirror.baseUrl + encodedPath;
+            return `
+                <a href="${downloadUrl}" class="download-button" target="_blank">
+                    ${mirror.name}
+                    <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                </a>
+            `;
+        }).join('');
+
+        const modalHtml = `
+            <div class="download-modal-overlay" onclick="closeDownloadModal()"></div>
+            <div class="download-modal">
+                <div class="modal-title">Select Download Mirror</div>
+                <div style="font-size:12px;color:var(--sub-text-color);margin-bottom:10px;word-break:break-all">${fullRepoPath.split('/').pop()}</div>
+                ${modalContent}
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    window.closeDownloadModal = function() {
+        const modalOverlay = document.querySelector('.download-modal-overlay');
+        const modal = document.querySelector('.download-modal');
+        if (modalOverlay) modalOverlay.remove();
+        if (modal) modal.remove();
+    }
+
+    init();
+
+</script>
+</body>
+</html>
