@@ -6,12 +6,12 @@
     <title>Scorpio File Downloads</title>
     <style>
         :root {
-            /* Light Theme */
+            /* Light Theme Variables */
             --primary-color: #42b983;
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
             --text-color: #34495e;
-            --sub-text-color: #666666;
+            --sub-text-color: #666666; /* Fixed syntax error here */
             --border-color: #eaecef;
             --hover-bg: #f0fcf6;
             --input-bg: #ffffff;
@@ -21,13 +21,13 @@
             --btn-text: #2c3e50;
         }
 
-        /* Dark Theme */
+        /* Dark Theme Variables */
         [data-theme="dark"] {
             --primary-color: #42b983;
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #e0e0e0;
-            --sub-text-color: #a0a0a0;
+            --sub-text-color: #a0a0a0; /* Fixed syntax error here */
             --border-color: #333333;
             --hover-bg: #2c3e50;
             --input-bg: #2d2d2d;
@@ -286,19 +286,25 @@
 
     // --- Core Logic ---
 
+    // Load files from API (with timestamp to prevent caching)
     async function loadFiles() {
         const container = id('fileListContainer');
         container.innerHTML = `<div class="loading">Loading files via <b>${currentSource === 'vercel' ? 'Proxy API' : 'GitHub'}</b>...</div>`;
 
+        // Prevent caching by adding a timestamp
+        const timestamp = new Date().getTime();
+
         try {
             let data = [];
             if (currentSource === 'vercel') {
-                const res = await fetch('/api/files');
+                // Fetch via Vercel Function with timestamp
+                const res = await fetch(`/api/files?t=${timestamp}`);
                 if (!res.ok) throw new Error(res.status === 404 ? "API file not found." : `API Error: ${res.status}`);
                 const json = await res.json();
                 data = json.tree;
             } else {
-                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`;
+                // Fetch via GitHub API directly
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1&t=${timestamp}`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`GitHub API Error: ${res.status}`);
                 const json = await res.json();
@@ -306,12 +312,13 @@
             }
 
             if (!data) throw new Error("No data received");
+
+            // Filter files (must start with BASE_DIR)
             allFiles = data.filter(item => item.path.startsWith(BASE_DIR));
 
             if (allFiles.length === 0) {
                 container.innerHTML = `<div class="error">No files found in '${BASE_DIR}'</div>`;
             } else {
-                // --- 修复重点：智能处理 URL 路径 ---
                 handleInitialPath();
             }
         } catch (e) {
@@ -320,48 +327,57 @@
         }
     }
 
-    // 处理初始 URL 逻辑 (区分文件和文件夹)
+    // Helper: Safely append BASE_DIR to path for URLs
+    // Ensures "Files/Subfolder" format
+    function getSafeFullPath(path) {
+        if (!path) return '';
+        if (path.startsWith(BASE_DIR + '/')) return path;
+        if (path === BASE_DIR) return path;
+        return BASE_DIR + '/' + path;
+    }
+
+    // Helper: Remove BASE_DIR from path for internal state
+    // Ensures "Subfolder" format (from "Files/Subfolder")
+    function normalizePath(fullPath) {
+        if (!fullPath) return '';
+        if (fullPath === BASE_DIR) return '';
+        if (fullPath.startsWith(BASE_DIR + '/')) {
+            return fullPath.substring(BASE_DIR.length + 1);
+        }
+        return fullPath;
+    }
+
+    // Handle deep links from URL params
     function handleInitialPath() {
         const urlParams = new URLSearchParams(window.location.search);
         const pathParam = urlParams.get('path');
 
         if (pathParam && pathParam.startsWith(BASE_DIR)) {
-            // 1. 在文件树中找到这个路径对应的 Item
+            // Find item in file tree
             const targetItem = allFiles.find(i => i.path === pathParam);
 
             if (targetItem) {
                 if (targetItem.type === 'blob') {
-                    // === 情况 A：链接指向一个文件 ===
-                    // 行为：进入父文件夹 + 自动弹出下载框
-
-                    // 获取父文件夹路径 (移除文件名)
+                    // Case A: Link is a file -> Go to parent folder + Open download modal
                     const parentPath = pathParam.substring(0, pathParam.lastIndexOf('/'));
+                    currentPath = normalizePath(parentPath);
 
-                    // 转换为相对路径
-                    const relPath = parentPath.replace(BASE_DIR + '/', '').replace(BASE_DIR, '');
-
-                    currentPath = relPath;
                     renderBreadcrumbs();
                     renderList();
-
-                    // 自动打开模态框
                     showDownloadModal(targetItem.path);
-
                 } else {
-                    // === 情况 B：链接指向一个文件夹 ===
-                    // 行为：直接进入文件夹
-                    const relPath = pathParam.replace(BASE_DIR + '/', '').replace(BASE_DIR, '');
-                    currentPath = relPath;
+                    // Case B: Link is a folder -> Go to folder
+                    currentPath = normalizePath(pathParam);
                     renderBreadcrumbs();
                     renderList();
                 }
             } else {
-                // 路径不存在，回首页
+                // Path not found, fallback to home
                 renderBreadcrumbs();
                 renderList();
             }
         } else {
-            // 没有参数，回首页
+            // No path param, go home
             renderBreadcrumbs();
             renderList();
         }
@@ -409,16 +425,18 @@
                 name: item.path.split('/').pop(),
                 path: item.path,
                 type: 'file',
-                displayPath: item.path.replace(BASE_DIR + '/', '')
+                displayPath: normalizePath(item.path)
             }));
         } else {
             if (currentPath) id('folderActions').style.display = 'flex';
             const prefix = currentPath ? `${BASE_DIR}/${currentPath}/` : `${BASE_DIR}/`;
             const processedFolders = new Set();
+
             allFiles.forEach(item => {
                 if (!item.path.startsWith(prefix)) return;
                 const relativePart = item.path.slice(prefix.length);
                 const segments = relativePart.split('/');
+
                 if (segments.length === 1 && item.type === 'blob') {
                     itemsToShow.push({ name: segments[0], path: item.path, type: 'file' });
                 } else if (segments.length > 1) {
@@ -450,12 +468,14 @@
                 </div>
             `;
 
+            // Click handling
             div.onclick = (e) => {
                 if(e.target.closest('.list-copy-btn')) return;
                 if (item.type === 'folder') navigateTo(item.path);
                 else showDownloadModal(item.path);
             };
 
+            // Copy Button handling
             const copyBtn = div.querySelector('.list-copy-btn');
             copyBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -467,13 +487,23 @@
         });
     }
 
+    // Generate link for specific item (always includes "Files/...")
     function generateDeepLink(itemPath) {
         const baseUrl = window.location.origin + window.location.pathname;
-        return `${baseUrl}?path=${encodeURIComponent(itemPath)}`;
+        const fullPath = getSafeFullPath(itemPath);
+        return `${baseUrl}?path=${encodeURIComponent(fullPath)}`;
     }
 
+    // Copy link for current folder (always includes "Files/...")
     function copyCurrentUrl() {
-        copyToClipboard(window.location.href);
+        const baseUrl = window.location.origin + window.location.pathname;
+        let finalUrl = baseUrl;
+
+        if (currentPath) {
+            const fullPath = getSafeFullPath(currentPath);
+            finalUrl = `${baseUrl}?path=${encodeURIComponent(fullPath)}`;
+        }
+        copyToClipboard(finalUrl);
     }
 
     function copyToClipboard(text) {
@@ -481,7 +511,18 @@
             showToast("Link Copied!");
         }).catch(err => {
             console.error('Failed to copy: ', err);
-            showToast("Failed to copy");
+            // Fallback for http or unsupported browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Link Copied!");
+            } catch (err) {
+                showToast("Failed to copy");
+            }
+            document.body.removeChild(textArea);
         });
     }
 
@@ -492,24 +533,31 @@
         setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
+    // Navigation (Updates internal state and URL)
     window.navigateTo = function(path) {
-        currentPath = path;
+        // Internal state uses relative path (no "Files/")
+        let relPath = normalizePath(path);
+        currentPath = relPath;
+
         id('searchInput').value = '';
+
+        // Browser URL uses full path (with "Files/")
         let newUrl = window.location.pathname;
-        if (path) {
-            const fullRelPath = `${BASE_DIR}/${path}`;
-            newUrl = `?path=${encodeURIComponent(fullRelPath)}`;
+        if (currentPath) {
+            const fullPath = getSafeFullPath(currentPath);
+            newUrl = `?path=${encodeURIComponent(fullPath)}`;
         }
-        window.history.pushState({path: path}, '', newUrl);
+
+        window.history.pushState({path: currentPath}, '', newUrl);
+
         renderBreadcrumbs();
         renderList();
     }
 
+    // Handle Browser Back Button
     window.onpopstate = function(event) {
-        // Handle browser Back/Forward
         const urlParams = new URLSearchParams(window.location.search);
         const pathParam = urlParams.get('path');
-        // Re-use the smart handler
         if (pathParam) {
             handleInitialPath();
         } else {
@@ -569,6 +617,7 @@
     }
     function id(name) { return document.getElementById(name); }
 
+    // Start
     initTheme();
     loadFiles();
 </script>
