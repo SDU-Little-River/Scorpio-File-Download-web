@@ -6,7 +6,7 @@
     <title>Scorpio File Downloads</title>
     <style>
         :root {
-            /* Light Theme Variables */
+            /* Light Theme */
             --primary-color: #42b983;
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
@@ -17,12 +17,11 @@
             --input-bg: #ffffff;
             --modal-bg: rgba(255, 255, 255, 0.98);
             --modal-overlay: rgba(0, 0, 0, 0.6);
-            --shadow-color: rgba(0, 0, 0, 0.05);
             --btn-bg: #ffffff;
             --btn-text: #2c3e50;
         }
 
-        /* Dark Theme Variables */
+        /* Dark Theme */
         [data-theme="dark"] {
             --primary-color: #42b983;
             --bg-color: #121212;
@@ -34,7 +33,6 @@
             --input-bg: #2d2d2d;
             --modal-bg: rgba(30, 30, 30, 0.98);
             --modal-overlay: rgba(0, 0, 0, 0.8);
-            --shadow-color: rgba(0, 0, 0, 0.5);
             --btn-bg: #2d2d2d;
             --btn-text: #e0e0e0;
         }
@@ -53,27 +51,19 @@
             margin: 0 auto;
             background: var(--card-bg);
             border-radius: 8px;
-            box-shadow: 0 2px 12px var(--shadow-color);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
             padding: 20px;
             min-height: 80vh;
             position: relative;
-            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
-        /* Header Layout */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
         }
-
         .header h2 { margin: 0; font-size: 24px; }
         .header-actions { display: flex; gap: 10px; }
 
-        /* Icon Buttons */
         .icon-btn {
             background: none; border: none; cursor: pointer; color: var(--text-color);
             padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -82,7 +72,6 @@
         .icon-btn:hover { background-color: var(--border-color); }
         .svg-icon { width: 24px; height: 24px; fill: currentColor; }
 
-        /* Search Box */
         .search-box { margin-bottom: 20px; position: relative; }
         .search-input {
             width: 100%; padding: 12px 15px; border: 2px solid var(--border-color);
@@ -91,11 +80,12 @@
         }
         .search-input:focus { outline: none; border-color: var(--primary-color); }
 
-        /* Current Folder Actions (Download Folder) */
+        /* Folder Action Bar */
         .folder-actions {
             margin-bottom: 15px;
             display: flex;
             justify-content: flex-end;
+            gap: 10px;
         }
         .btn-sm {
             padding: 6px 12px;
@@ -109,10 +99,10 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            transition: all 0.2s;
         }
-        .btn-sm:hover { background-color: var(--border-color); }
+        .btn-sm:hover { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-        /* Breadcrumbs */
         .breadcrumbs {
             margin-bottom: 15px; font-size: 15px; color: var(--sub-text-color);
             padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
@@ -123,18 +113,30 @@
         .crumb-separator { margin: 0 5px; color: var(--sub-text-color); }
         .crumb-current { color: var(--sub-text-color); cursor: default; text-decoration: none !important; }
 
-        /* File List */
         .file-list { list-style: none; padding: 0; margin: 0; }
         .file-item {
             display: flex; align-items: center; padding: 12px 10px;
             border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;
             cursor: pointer; border-radius: 4px; color: var(--text-color);
+            position: relative;
         }
         .file-item:hover { background-color: var(--hover-bg); }
         .item-icon { width: 24px; height: 24px; margin-right: 12px; flex-shrink: 0; }
-        .item-name { flex-grow: 1; font-size: 15px; word-break: break-all; }
+        .item-name { flex-grow: 1; font-size: 15px; word-break: break-all; padding-right: 40px; }
 
-        .loading, .error { text-align: center; padding: 40px; color: var(--sub-text-color); line-height: 1.6; }
+        /* Copy Button in List */
+        .list-copy-btn {
+            padding: 6px;
+            border-radius: 4px;
+            color: var(--sub-text-color);
+            display: none; /* Hidden by default, shown on hover */
+            align-items: center;
+            justify-content: center;
+        }
+        .file-item:hover .list-copy-btn { display: flex; }
+        .list-copy-btn:hover { background-color: rgba(0,0,0,0.1); color: var(--primary-color); }
+
+        .loading, .error { text-align: center; padding: 40px; color: var(--sub-text-color); }
         .error { color: #e74c3c; }
 
         /* Modals */
@@ -145,14 +147,14 @@
             width: 500px; max-width: 90%; color: var(--text-color);
             display: none; flex-direction: column; gap: 15px;
         }
-        .modal.active { display: flex; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal.active { display: flex; animation: popIn 0.3s ease; }
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--modal-overlay); backdrop-filter: blur(2px); z-index: 1000;
             display: none; animation: fadeIn 0.2s ease;
         }
         .modal-overlay.active { display: block; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .modal-title { font-size: 18px; font-weight: bold; }
 
         .download-button, .action-button {
             display: inline-flex; justify-content: space-between; align-items: center;
@@ -163,18 +165,21 @@
         }
         .download-button:hover, .action-button:hover {
             border-color: var(--primary-color); color: var(--primary-color) !important;
-            box-shadow: 0 4px 10px rgba(66, 185, 131, 0.15);
         }
-        .action-button.active { background-color: var(--primary-color); color: white !important; border-color: var(--primary-color); }
-        .action-button.active:hover { opacity: 0.9; box-shadow: none; color: white !important; }
+        .action-button.active { background-color: var(--primary-color); color: white !important; }
         .download-icon { width: 20px; height: 20px; color: var(--primary-color); }
 
-        .settings-group { display: flex; flex-direction: column; gap: 10px; }
-        .settings-label { font-size: 14px; color: var(--sub-text-color); }
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background-color: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
+            border-radius: 50px; font-size: 14px; z-index: 2000; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { from { transform: translate(-50%, -45%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
-        @media (max-width: 600px) { .header h2 { font-size: 20px; } }
     </style>
 </head>
 <body>
@@ -183,12 +188,10 @@
     <div class="header">
         <h2>Scorpio Downloads</h2>
         <div class="header-actions">
-            <!-- Theme Toggle Button -->
-            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Theme">
+            <button class="icon-btn" onclick="toggleTheme()" title="Theme">
                 <svg class="svg-icon" id="sunIcon" viewBox="0 0 24 24" style="display:block"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000 1.41.996.996 0 001.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06z"/></svg>
                 <svg class="svg-icon" id="moonIcon" viewBox="0 0 24 24" style="display:none"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
             </button>
-            <!-- Settings Button -->
             <button class="icon-btn" onclick="openSettings()" title="Settings">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
@@ -201,11 +204,15 @@
 
     <div class="breadcrumbs" id="breadcrumbs"></div>
 
-    <!-- Action Bar (Download Folder) -->
+    <!-- Action Bar (Folder Actions) -->
     <div id="folderActions" class="folder-actions" style="display:none;">
-        <a id="btnDownloadFolder" href="#" target="_blank" class="btn-sm">
+        <button onclick="copyCurrentUrl()" class="btn-sm" title="Copy link to this folder">
+            <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+            Copy Link
+        </button>
+        <a id="btnDownloadFolder" href="#" target="_blank" class="btn-sm" title="Download folder as ZIP">
             <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            Download this Folder (ZIP)
+            Download ZIP
         </a>
     </div>
 
@@ -214,17 +221,18 @@
     </div>
 </div>
 
-<!-- Modals (Download & Settings) -->
+<!-- Toast Notification -->
+<div id="toast" class="toast">Link Copied!</div>
+
+<!-- Modals -->
 <div class="modal-overlay" id="downloadOverlay" onclick="closeAllModals()"></div>
 
-<!-- Download Selection Modal -->
 <div class="modal" id="downloadModal">
     <div class="modal-title">Select Mirror</div>
     <div id="downloadFileName" style="font-size:12px;color:var(--sub-text-color);margin-bottom:10px;word-break:break-all"></div>
     <div id="downloadLinks" style="display:flex;flex-direction:column;gap:10px;"></div>
 </div>
 
-<!-- Settings Modal -->
 <div class="modal" id="settingsModal">
     <div class="modal-title">Settings</div>
     <div class="settings-group">
@@ -241,94 +249,64 @@
 </div>
 
 <script>
-    // --- Configuration ---
     const REPO_OWNER = 'DuskScorpio';
     const REPO_NAME = 'Scorpio-File-Downloads';
     const BRANCH = 'main';
     const BASE_DIR = 'Files';
 
-    // --- State Management ---
     let allFiles = [];
     let currentPath = '';
     let currentSource = localStorage.getItem('dataSource') || 'vercel';
 
-    // --- Icons (SVG) ---
     const ICONS = {
         folder: `<svg class="item-icon" viewBox="0 0 24 24" fill="#F7D774"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
-        file: `<svg class="item-icon" viewBox="0 0 24 24" fill="#a0a0a0"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
+        file: `<svg class="item-icon" viewBox="0 0 24 24" fill="#a0a0a0"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`,
+        link: `<svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`
     };
 
-    // --- Theme Logic ---
     function initTheme() {
         const savedTheme = localStorage.getItem('theme');
         const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
         applyTheme(isDark);
     }
-
     function applyTheme(isDark) {
         const html = document.documentElement;
-        if(isDark) {
-            html.setAttribute('data-theme', 'dark');
-            id('sunIcon').style.display='none';
-            id('moonIcon').style.display='block';
-        } else {
-            html.removeAttribute('data-theme');
-            id('sunIcon').style.display='block';
-            id('moonIcon').style.display='none';
-        }
+        if(isDark) { html.setAttribute('data-theme', 'dark'); id('sunIcon').style.display='none'; id('moonIcon').style.display='block'; }
+        else { html.removeAttribute('data-theme'); id('sunIcon').style.display='block'; id('moonIcon').style.display='none'; }
     }
-
     window.toggleTheme = function() {
         const current = document.documentElement.getAttribute('data-theme') === 'dark';
         localStorage.setItem('theme', !current ? 'dark' : 'light');
         applyTheme(!current);
     }
 
-    // --- Core Logic ---
-
-    // 1. Initialize and check URL parameters
     async function loadFiles() {
         const container = id('fileListContainer');
         container.innerHTML = `<div class="loading">Loading files via <b>${currentSource === 'vercel' ? 'Proxy API' : 'GitHub'}</b>...</div>`;
-
         try {
             let data = [];
             if (currentSource === 'vercel') {
-                // Fetch via local proxy (Vercel/Cloudflare Function)
                 const res = await fetch('/api/files');
-                if (!res.ok) {
-                    if(res.status === 404) throw new Error("API file not found.");
-                    throw new Error(`API Error: ${res.status}`);
-                }
+                if (!res.ok) throw new Error(res.status === 404 ? "API file not found." : `API Error: ${res.status}`);
                 const json = await res.json();
                 data = json.tree;
             } else {
-                // Fetch directly from GitHub
                 const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`GitHub API Error: ${res.status}`);
                 const json = await res.json();
                 data = json.tree;
             }
-
             if (!data) throw new Error("No data received");
-
-            // Filter files based on BASE_DIR
             allFiles = data.filter(item => item.path.startsWith(BASE_DIR));
-
             if (allFiles.length === 0) {
                 container.innerHTML = `<div class="error">No files found in '${BASE_DIR}'</div>`;
             } else {
-                // Check 'path' parameter in URL for deep linking
                 const urlParams = new URLSearchParams(window.location.search);
                 const pathParam = urlParams.get('path');
-
-                // If URL has path and starts with BASE_DIR, set it as currentPath
                 if (pathParam && pathParam.startsWith(BASE_DIR)) {
-                    // Remove BASE_DIR prefix for internal logic (navigateTo uses relative path)
                     currentPath = pathParam.replace(BASE_DIR + '/', '').replace(BASE_DIR, '');
                 }
-
                 renderBreadcrumbs();
                 renderList();
             }
@@ -338,7 +316,6 @@
         }
     }
 
-    // 2. Render Breadcrumbs Navigation
     function renderBreadcrumbs() {
         const breadContainer = id('breadcrumbs');
         let html = `<span class="crumb" onclick="navigateTo('')">Home</span>`;
@@ -356,31 +333,25 @@
         }
         breadContainer.innerHTML = html;
 
-        // --- Render Folder Download Button ---
         const folderActions = id('folderActions');
         const btnDownload = id('btnDownloadFolder');
 
         if (currentPath) {
-            // We are inside a subfolder
             folderActions.style.display = 'flex';
-            // Construct full GitHub folder URL
             const fullFolderUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/tree/${BRANCH}/${BASE_DIR}/${currentPath}`;
-            // Use download-directory.github.io service
             btnDownload.href = `https://download-directory.github.io/?url=${encodeURIComponent(fullFolderUrl)}`;
         } else {
-            // Home / Root
             folderActions.style.display = 'none';
         }
     }
 
-    // 3. Render File List
     function renderList(searchQuery = '') {
         const container = id('fileListContainer');
         container.innerHTML = '';
         let itemsToShow = [];
 
         if (searchQuery) {
-            id('folderActions').style.display = 'none'; // Hide download button during search
+            id('folderActions').style.display = 'none';
             itemsToShow = allFiles.filter(item =>
                 item.type === 'blob' && item.path.toLowerCase().includes(searchQuery.toLowerCase())
             ).map(item => ({
@@ -390,22 +361,16 @@
                 displayPath: item.path.replace(BASE_DIR + '/', '')
             }));
         } else {
-            // Restore folder download button visibility
             if (currentPath) id('folderActions').style.display = 'flex';
-
             const prefix = currentPath ? `${BASE_DIR}/${currentPath}/` : `${BASE_DIR}/`;
             const processedFolders = new Set();
-
             allFiles.forEach(item => {
                 if (!item.path.startsWith(prefix)) return;
                 const relativePart = item.path.slice(prefix.length);
                 const segments = relativePart.split('/');
-
                 if (segments.length === 1 && item.type === 'blob') {
-                    // It's a file
                     itemsToShow.push({ name: segments[0], path: item.path, type: 'file' });
                 } else if (segments.length > 1) {
-                    // It's a folder
                     const folderName = segments[0];
                     if (!processedFolders.has(folderName)) {
                         processedFolders.add(folderName);
@@ -413,7 +378,6 @@
                     }
                 }
             });
-            // Sort: Folders first, then files
             itemsToShow.sort((a, b) => (a.type === b.type) ? a.name.localeCompare(b.name) : (a.type === 'folder' ? -1 : 1));
         }
 
@@ -426,58 +390,99 @@
             const div = document.createElement('div');
             div.className = 'file-item';
             let displayName = searchQuery ? `<div>${item.name}<div style="font-size:12px;color:var(--sub-text-color)">${item.displayPath}</div></div>` : item.name;
-            div.innerHTML = `${item.type === 'folder' ? ICONS.folder : ICONS.file}<div class="item-name">${displayName}</div>`;
-            div.onclick = item.type === 'folder' ? () => navigateTo(item.path) : () => showDownloadModal(item.path);
+
+            // Item HTML structure
+            div.innerHTML = `
+                ${item.type === 'folder' ? ICONS.folder : ICONS.file}
+                <div class="item-name">${displayName}</div>
+                <div class="list-copy-btn" title="Copy Link">
+                    ${ICONS.link}
+                </div>
+            `;
+
+            // Click Logic: Open Folder or Modal
+            div.onclick = (e) => {
+                // Ignore if clicked on copy button
+                if(e.target.closest('.list-copy-btn')) return;
+
+                if (item.type === 'folder') navigateTo(item.path);
+                else showDownloadModal(item.path);
+            };
+
+            // Copy Link Logic
+            const copyBtn = div.querySelector('.list-copy-btn');
+            copyBtn.onclick = (e) => {
+                e.stopPropagation(); // Stop propagation to prevent opening
+                const link = generateDeepLink(item.path);
+                copyToClipboard(link);
+            };
+
             container.appendChild(div);
         });
     }
 
-    // 4. Navigation Function: Update URL and State
+    // Generate link: yoursite.com/?path=Files/Doc.txt
+    function generateDeepLink(itemPath) {
+        // Construct deep link URL
+        const fullRelPath = itemPath.replace(BASE_DIR + '/', '').replace(BASE_DIR, ''); // Ensure relative path
+        const baseUrl = window.location.origin + window.location.pathname;
+        // Use the original path from API (Files/xxx)
+        // But for URL param, we need to match how navigateTo handles it.
+        // Actually, easier: pass the RAW path, let loadFiles handle it.
+        return `${baseUrl}?path=${encodeURIComponent(itemPath)}`;
+    }
+
+    function copyCurrentUrl() {
+        copyToClipboard(window.location.href);
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Link Copied!");
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            showToast("Failed to copy");
+        });
+    }
+
+    function showToast(msg) {
+        const toast = id('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
     window.navigateTo = function(path) {
         currentPath = path;
         id('searchInput').value = '';
-
-        // Update browser URL without refreshing
-        // If path exists: URL becomes ?path=Files/SubDir
-        // If path is empty (Home): URL becomes /
         let newUrl = window.location.pathname;
         if (path) {
             const fullRelPath = `${BASE_DIR}/${path}`;
             newUrl = `?path=${encodeURIComponent(fullRelPath)}`;
         }
-
         window.history.pushState({path: path}, '', newUrl);
-
         renderBreadcrumbs();
         renderList();
     }
 
-    // 5. Listen for browser Back/Forward buttons
     window.onpopstate = function(event) {
-        // Re-parse URL or read state when user clicks back
         const urlParams = new URLSearchParams(window.location.search);
         const pathParam = urlParams.get('path');
-
         if (pathParam && pathParam.startsWith(BASE_DIR)) {
             currentPath = pathParam.replace(BASE_DIR + '/', '').replace(BASE_DIR, '');
         } else {
             currentPath = '';
         }
-
         id('searchInput').value = '';
         renderBreadcrumbs();
         renderList();
     };
 
-    // Search Listener
     id('searchInput').addEventListener('input', (e) => renderList(e.target.value.trim()));
 
-    // --- Modal Logic ---
     function showDownloadModal(fullRepoPath) {
         const encodedPath = fullRepoPath.trim().split('/').map(encodeURIComponent).join('/');
         const repoBase = `https://github.com/${REPO_OWNER}/${REPO_NAME}/raw/${BRANCH}/`;
-
-        // Define Mirrors
         const mirrors = [
             { name: 'GitHub Raw (Official)', baseUrl: repoBase },
             { name: 'Mirror 1 (github.tbedu.top)', baseUrl: 'https://github.tbedu.top/' + repoBase },
@@ -486,14 +491,12 @@
             { name: 'Mirror 4 (github.7boe.top)', baseUrl: 'https://github.7boe.top/' + repoBase },
             { name: 'Mirror 5 (fastgit.cc)', baseUrl: 'https://fastgit.cc/' + repoBase }
         ];
-
         const linksHtml = mirrors.map(mirror => `
             <a href="${mirror.baseUrl + encodedPath}" class="download-button" target="_blank">
                 ${mirror.name}
                 <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             </a>
         `).join('');
-
         id('downloadFileName').innerText = fullRepoPath.split('/').pop();
         id('downloadLinks').innerHTML = linksHtml;
         id('downloadOverlay').classList.add('active');
@@ -505,13 +508,11 @@
         id('downloadOverlay').classList.add('active');
         id('settingsModal').classList.add('active');
     }
-
     window.closeAllModals = function() {
         id('downloadOverlay').classList.remove('active');
         id('downloadModal').classList.remove('active');
         id('settingsModal').classList.remove('active');
     }
-
     window.changeSource = function(source) {
         currentSource = source;
         localStorage.setItem('dataSource', source);
@@ -519,17 +520,14 @@
         closeAllModals();
         loadFiles();
     }
-
     function updateSettingsUI() {
         id('btnSourceVercel').classList.remove('active');
         id('btnSourceGithub').classList.remove('active');
         if (currentSource === 'vercel') id('btnSourceVercel').classList.add('active');
         else id('btnSourceGithub').classList.add('active');
     }
-
     function id(name) { return document.getElementById(name); }
 
-    // --- Initialize ---
     initTheme();
     loadFiles();
 </script>
