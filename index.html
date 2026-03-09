@@ -637,13 +637,24 @@
 
       // Track download globally
       window.trackDownload = function(itemPath) {
-        // 1. Update UI locally for instant feedback
+        // 1. 本地立即更新 UI，营造无延迟体验
         downloadCounts[itemPath] = (downloadCounts[itemPath] || 0) + 1;
-        renderList(id('searchInput').value.trim()); // Refresh list to show new count
+        renderList(id('searchInput').value.trim()); 
         
-        // 2. Fire async request to increment in DB
-        fetch(`/api/downloads?action=increment&file=${encodeURIComponent(itemPath)}`)
-            .catch(err => console.error("Failed to track download", err));
+        // 2. 发送 POST 请求，彻底防止浏览器缓存拦截
+        fetch(`/api/downloads?action=increment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ file: itemPath })
+        })
+        .then(async res => {
+            if (!res.ok) {
+                console.error("API Error:", await res.text());
+            }
+        })
+        .catch(err => console.error("Failed to track download", err));
       }
 
       function generateDeepLink(itemPath) {
